@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Explorer Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+  <script>
+    // Protect index.html: redirect to login.html if not authenticated
+    requireAuth();
+  </script>
+</head>
+<body>
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+  <header class="topbar">
+    <button class="menu-button" id="toggle-history" type="button" aria-label="Toggle chat history">☰</button>
+    <a class="brand" href="index.html" aria-label="AI Explorer home">
+      <span class="brand-mark" aria-hidden="true"><i></i><b></b><em></em></span>
+      <span>AI Explorer</span>
+    </a>
+    <div class="topbar-actions">
+      <span class="api-status" id="api-status"><span class="status-dot"></span> API ready to connect</span>
+      <div class="user-badge" id="user-badge" title="Active session">
+        <span class="user-avatar" id="user-avatar">👤</span>
+        <span class="user-name" id="user-name">Explorer</span>
+      </div>
+      <button class="logout-button" id="logout-button" type="button" title="Log out of AI Explorer">Log out</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="history-panel" id="history-panel">
+      <button class="new-chat-button" id="new-chat" type="button"><span>＋</span> New chat</button>
+      <p class="history-title">Recent chats</p>
+      <div class="history-list" id="history-list"></div>
+    </aside>
+  <main class="shell">
+    <section class="chat-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Your AI study companion</p>
+          <h1>Ask anything.<br /><em>Learn everything.</em></h1>
+        </div>
+        <button class="clear-button" id="clear-chat" type="button">Clear chat</button>
+      </div>
+      <p class="hero-copy">Ask a question, explore a topic, or get help understanding something new. Your cheerful AI companion is ready to help. ✨</p>
+      <div class="chat-window" id="chat-window" aria-live="polite"></div>
+      <div class="typing-indicator" id="typing-indicator" hidden><span></span><span></span><span></span> Thinking</div>
+      <form class="search-form" id="search-form">
+        <label class="sr-only" for="search-input">Ask your AI assistant</label>
+        <span class="search-icon">⌕</span>
+        <input id="search-input" type="text" placeholder="Ask your question here..." autocomplete="off" />
+        <button type="submit">Send <span aria-hidden="true">↑</span></button>
+      </form>
+      <div class="quick-searches" aria-label="Suggested questions">
+        <span>Try asking:</span>
+        <button type="button" data-query="Explain artificial intelligence in simple words">Explain AI simply</button>
+        <button type="button" data-query="What are the latest trends in technology?">Latest tech trends</button>
+        <button type="button" data-query="Help me learn JavaScript">Learn JavaScript</button>
+      </div>
+    </section>
+  </main>
+  </div>
+
+  <footer><span>Simple web project</span><span>Powered by <strong>SANJIVANI</strong></span></footer>
+  <script src="script.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - AI Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="login.html" aria-label="AI Explorer home">
+      <span class="brand-mark" aria-hidden="true"><i></i><b></b><em></em></span>
+      <span>AI Explorer</span>
+    </a>
+    <span class="api-status"><span class="status-dot"></span> Career Guidance AI</span>
+  </header>
+
+  <main class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="auth-badge">Account Access</span>
+        <h1 class="auth-title">Welcome Back</h1>
+        <p class="auth-subtitle">Log in to continue your career discovery journey.</p>
+      </div>
+
+      <div id="auth-alert" class="auth-message" role="alert" aria-live="polite"></div>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="input-wrapper">
+            <input
+              id="email"
+              class="auth-input"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrapper has-toggle">
+            <input
+              id="password"
+              class="auth-input"
+              type="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              id="toggle-password"
+              class="password-toggle-btn"
+              type="button"
+              aria-label="Show password"
+            >Show</button>
+          </div>
+        </div>
+
+        <button id="login-submit" class="auth-submit-btn" type="submit">
+          <span>Log In</span>
+        </button>
+
+        <div class="auth-links">
+          <span>Don't have an account?</span>
+          <a href="signup.html">Sign Up</a>
+        </div>
+      </form>
+    </div>
+
+    <aside class="demo-notice">
+      <strong>⚠️ Demo Security Notice:</strong> This project uses browser <code>localStorage</code> with Web Crypto SHA-256 password hashing for demonstration purposes. Accounts are stored locally on this browser and do not sync across devices or replace a production backend server.
+    </aside>
+  </main>
+
+  <footer>
+    <span>Simple web project</span>
+    <span>Powered by <strong>SANJIVANI</strong></span>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    // If the user already has an active session, go directly to the chat explorer
+    redirectIfAuthenticated();
+
+    // Initialize the starfield particles
+    initBackgroundParticles();
+
+    const loginForm = document.getElementById("login-form");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const togglePasswordBtn = document.getElementById("toggle-password");
+    const submitBtn = document.getElementById("login-submit");
+    const alertBox = document.getElementById("auth-alert");
+
+    // Toggle password visibility
+    togglePasswordBtn.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePasswordBtn.textContent = isPassword ? "Hide" : "Show";
+      togglePasswordBtn.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+    });
+
+    // Helper to display error or success messages
+    function showMessage(type, message) {
+      alertBox.className = "auth-message " + type;
+      alertBox.textContent = message;
+    }
+
+    // Helper to clear messages
+    function clearMessage() {
+      alertBox.className = "auth-message";
+      alertBox.textContent = "";
+    }
+
+    // Check if user was just redirected from signup
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("registered") === "true") {
+      showMessage("success", "Account created successfully! Please log in with your credentials.");
+      const registeredEmail = urlParams.get("email");
+      if (registeredEmail) {
+        emailInput.value = registeredEmail;
+        passwordInput.focus();
+      }
+    }
+
+    // Handle login form submission
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMessage();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email) {
+        showMessage("error", "Please enter your email address.");
+        emailInput.focus();
+        return;
+      }
+
+      if (!password) {
+        showMessage("error", "Please enter your password.");
+        passwordInput.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Checking...</span>";
+
+      try {
+        const result = await loginUser(email, password);
+        if (result.success) {
+          showMessage("success", result.message);
+          submitBtn.innerHTML = "<span>Success! Redirecting...</span>";
+          window.setTimeout(() => {
+            window.location.href = "index.html";
+          }, 600);
+        } else {
+          showMessage("error", result.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "<span>Log In</span>";
+          passwordInput.focus();
+        }
+      } catch (err) {
+        showMessage("error", "An unexpected error occurred during login. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "<span>Log In</span>";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - AI Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="login.html" aria-label="AI Explorer home">
+      <span class="brand-mark" aria-hidden="true"><i></i><b></b><em></em></span>
+      <span>AI Explorer</span>
+    </a>
+    <span class="api-status"><span class="status-dot"></span> Career Guidance AI</span>
+  </header>
+
+  <main class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="auth-badge">New Account</span>
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Join AI Explorer to start mapping your future career path.</p>
+      </div>
+
+      <div id="auth-alert" class="auth-message" role="alert" aria-live="polite"></div>
+
+      <form id="signup-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="fullname">Full Name</label>
+          <div class="input-wrapper">
+            <input
+              id="fullname"
+              class="auth-input"
+              type="text"
+              placeholder="e.g. Alex Johnson"
+              autocomplete="name"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="input-wrapper">
+            <input
+              id="email"
+              class="auth-input"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrapper has-toggle">
+            <input
+              id="password"
+              class="auth-input"
+              type="password"
+              placeholder="At least 6 characters"
+              autocomplete="new-password"
+              required
+            />
+            <button
+              id="toggle-password"
+              class="password-toggle-btn"
+              type="button"
+              aria-label="Show password"
+            >Show</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirm-password">Confirm Password</label>
+          <div class="input-wrapper has-toggle">
+            <input
+              id="confirm-password"
+              class="auth-input"
+              type="password"
+              placeholder="Re-enter your password"
+              autocomplete="new-password"
+              required
+            />
+            <button
+              id="toggle-confirm-password"
+              class="password-toggle-btn"
+              type="button"
+              aria-label="Show confirm password"
+            >Show</button>
+          </div>
+        </div>
+
+        <button id="signup-submit" class="auth-submit-btn" type="submit">
+          <span>Create Account</span>
+        </button>
+
+        <div class="auth-links">
+          <span>Already have an account?</span>
+          <a href="login.html">Log In</a>
+        </div>
+      </form>
+    </div>
+
+    <aside class="demo-notice">
+      <strong>⚠️ Demo Security Notice:</strong> This project stores accounts in your browser's <code>localStorage</code> with unique cryptographic salt & Web Crypto SHA-256 hashing. Passwords are never stored in plain text.
+    </aside>
+  </main>
+
+  <footer>
+    <span>Simple web project</span>
+    <span>Powered by <strong>SANJIVANI</strong></span>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    // If the user already has an active session, go directly to the chat explorer
+    redirectIfAuthenticated();
+
+    // Initialize the starfield particles
+    initBackgroundParticles();
+
+    const signupForm = document.getElementById("signup-form");
+    const nameInput = document.getElementById("fullname");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirm-password");
+    const togglePasswordBtn = document.getElementById("toggle-password");
+    const toggleConfirmBtn = document.getElementById("toggle-confirm-password");
+    const submitBtn = document.getElementById("signup-submit");
+    const alertBox = document.getElementById("auth-alert");
+
+    // Toggle password visibility
+    togglePasswordBtn.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePasswordBtn.textContent = isPassword ? "Hide" : "Show";
+      togglePasswordBtn.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+    });
+
+    // Toggle confirm password visibility
+    toggleConfirmBtn.addEventListener("click", () => {
+      const isPassword = confirmPasswordInput.type === "password";
+      confirmPasswordInput.type = isPassword ? "text" : "password";
+      toggleConfirmBtn.textContent = isPassword ? "Hide" : "Show";
+      toggleConfirmBtn.setAttribute("aria-label", isPassword ? "Hide confirm password" : "Show confirm password");
+    });
+
+    // Display error or success messages
+    function showMessage(type, message) {
+      alertBox.className = "auth-message " + type;
+      alertBox.textContent = message;
+    }
+
+    // Clear messages
+    function clearMessage() {
+      alertBox.className = "auth-message";
+      alertBox.textContent = "";
+    }
+
+    // Handle signup form submission
+    signupForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMessage();
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+
+      // Basic client validations
+      if (!name) {
+        showMessage("error", "Please enter your full name.");
+        nameInput.focus();
+        return;
+      }
+
+      if (!email) {
+        showMessage("error", "Please enter your email address.");
+        emailInput.focus();
+        return;
+      }
+
+      if (!isValidEmail(email)) {
+        showMessage("error", "Please enter a valid email address (e.g. name@example.com).");
+        emailInput.focus();
+        return;
+      }
+
+      if (!password) {
+        showMessage("error", "Please create a password.");
+        passwordInput.focus();
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("error", "Password must be at least 6 characters long.");
+        passwordInput.focus();
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage("error", "Passwords do not match. Please ensure both passwords are identical.");
+        confirmPasswordInput.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Creating Account...</span>";
+
+      try {
+        const result = await registerUser({
+          name: name,
+          email: email,
+          password: password,
+          confirmPassword: confirmPassword
+        });
+
+        if (result.success) {
+          showMessage("success", result.message);
+          submitBtn.innerHTML = "<span>Account Created!</span>";
+          // Redirect to login page after a brief moment with pre-filled email
+          window.setTimeout(() => {
+            const redirectUrl = "login.html?registered=true&email=" + encodeURIComponent(email);
+            window.location.href = redirectUrl;
+          }, 1200);
+        } else {
+          showMessage("error", result.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "<span>Create Account</span>";
+        }
+      } catch (err) {
+        showMessage("error", "An error occurred while creating your account. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "<span>Create Account</span>";
+      }
+    });
+  </script>
+</body>
+</html>
